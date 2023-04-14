@@ -3,7 +3,7 @@ package main;
 import java.awt.*;
 
 public class Game {
-    public final static int GAME_WIDTH = 1600;
+    public final static int GAME_WIDTH = 1000;
     public final static int GAME_HEIGHT = 900;
 
     private Thread gameThread;
@@ -11,15 +11,22 @@ public class Game {
     private final int UPS_SET = 60;
 
     private GamePanel gamePanel;
+    private InfoPanel infoPanel;
     private GameWindow gameWindow;
     public Game(){
         gamePanel = new GamePanel(this);
-        gameWindow = new GameWindow(gamePanel);
+        infoPanel = new InfoPanel(this);
+        gameWindow = new GameWindow(gamePanel, infoPanel);
         gamePanel.setFocusable(true);
         gamePanel.requestFocus();
+        gamePanel.setAlignmentX(100);
 
         startGameLoop();
     }
+    public GamePanel getGamePanel(){
+        return gamePanel;
+    }
+
 
 
     private void startGameLoop(){
@@ -58,6 +65,7 @@ public class Game {
 
             if(deltaF >= 1){
                 gamePanel.repaint();
+                infoPanel.repaint();
                 frames++;
                 deltaF--;
             }

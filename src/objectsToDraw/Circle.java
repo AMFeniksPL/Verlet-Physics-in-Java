@@ -32,7 +32,7 @@ public class Circle {
         this.radius = radius;
 
         accX = 0;
-        accY = 1000;
+        accY = 100;
 
         this.color = color;
     }
@@ -44,8 +44,8 @@ public class Circle {
         x_old = x_cur;
         y_old = y_cur;
 
-        x_cur += velX + accX * dt * dt;
-        y_cur += velY + accY * dt * dt;
+        x_cur += velX + (accX - velX * 40) * dt * dt;
+        y_cur += velY + (accY - velY * 40) * dt * dt;
 
         accX = 0;
         accY = 0;

@@ -23,18 +23,25 @@ public class GamePanel extends JPanel {
     private double lastTimeOfBallSpawn;
     private boolean canCreateBall;
     private final double ballTimeDelay;
-    private short substeps = 8;
+    private short substeps = 10;
     private final double startGameTime;
-    private static int MAX_BALLS = 50;
+    private static int MAX_BALLS = 11350;
+    private int ballCount = 0;
+
+
 
 
     ArrayList<Circle> listOfCircle = new ArrayList<Circle>();
     ArrayList<Color> listOfColors = new ArrayList<Color>();
     ArrayList<Circle> listOfNewCircle = new ArrayList<Circle>();
 
-    private final int cellSize = 50;
-    private final int cellWidth = (GAME_WIDTH / cellSize) + 1;
-    private final int cellHeight = (GAME_HEIGHT / cellSize) + 1;
+
+    private int SIMULATION_X = 1000;
+    private int SIMULATION_Y = 900;
+
+    private final int cellSize = 8;
+    private final int cellWidth = (SIMULATION_X / cellSize) + 1;
+    private final int cellHeight = (SIMULATION_Y / cellSize) + 1;
     private CollisionList [][] collisionGrid;
 
 
@@ -46,11 +53,13 @@ public class GamePanel extends JPanel {
     private float render_time;
 
 
+
+
     private Game game;
     public GamePanel(Game game){
 
         this.game = game;
-        circleConstraint = new CircleConstraints(GAME_WIDTH/2, GAME_HEIGHT/2, 400);
+        circleConstraint = new CircleConstraints(GAME_WIDTH/2, GAME_HEIGHT/2, 425);
 
         lastTimeOfBallSpawn = System.nanoTime();
         canCreateBall = false;
@@ -64,7 +73,7 @@ public class GamePanel extends JPanel {
     }
 
     private void setPanelSize() {
-        Dimension size = new Dimension(GAME_WIDTH, GAME_HEIGHT);
+        Dimension size = new Dimension(1000, 900);
         setMinimumSize(size);
         setPreferredSize(size);
         setMaximumSize(size);
@@ -100,12 +109,25 @@ public class GamePanel extends JPanel {
     private void write_file() throws AWTException, IOException {
 
         BufferedImage screenShot = ImageIO.read(new File("res/Phoenix Wallpaper_3.jpg"));
+        int diffX = (screenShot.getWidth() - SIMULATION_X)/2;
+        int diffY = (screenShot.getHeight() - SIMULATION_Y)/2;
 
         try {
             FileWriter myWriter = new FileWriter("color_positions.txt");
             for (Circle circle: listOfCircle){
                 myWriter.write((circle.getX_cur()) + " " + (circle.getY_cur()) + " ");
-                Color color = new Color(screenShot.getRGB((int)(circle.getX_cur() + circle.getRadius()), (int)(circle.getY_cur() + circle.getRadius())));
+
+                Color color = new Color(
+                        screenShot.getRGB(
+                                (int)(circle.getX_cur() + circle.getRadius() + diffX),
+                                (int)(circle.getY_cur() + circle.getRadius() + diffY)
+                        )
+                );
+
+
+
+
+
                 int red = color.getRed();
                 int green = color.getGreen();
                 int blue = color.getBlue();
@@ -132,9 +154,12 @@ public class GamePanel extends JPanel {
 
     public void update(){
         timer.start();
-        if (listOfCircle.size() < MAX_BALLS){
-            create_ball(listOfCircle.size());
-            create_ball(listOfCircle.size());
+        if (ballCount < MAX_BALLS){
+            for (int i = 0; i < 10; i++) {
+                create_ball(ballCount);
+                ballCount++;
+            }
+
             lastTimeOfBallSpawn = System.nanoTime();
             canCreateBall = false;
         }
@@ -143,22 +168,25 @@ public class GamePanel extends JPanel {
         }
 
         for (int i = 0; i < substeps; i++){
-            apply_gravity();
+//            apply_gravity();
 //            solve_collision_classic();
             add_objects_to_grid();
             find_collision_grid();
-            apply_constraints();
+//            apply_constraints();
+            apply_gravity();
             update_positions(((double)1/60) / substeps);
+            check_constraint_rectangle();
         }
         physics_time = (float) timer.stop_miliseconds();
 
     }
 
     private void create_ball(int t) {
-        double x = (double)GAME_WIDTH / 2 + circleConstraint.getRadius() * Math.cos( 0.3) * Math.pow(-1, t);
-        double y = (double)GAME_HEIGHT/ 2 + circleConstraint.getRadius()  * Math.sin( 2);
-
-        double randRadius = 25;
+//        double x = (double)GAME_WIDTH / 2 + circleConstraint.getRadius() * Math.cos( 0.3) * Math.pow(-1, t);
+//        double y = (double)GAME_HEIGHT/ 2 + circleConstraint.getRadius()  * Math.sin( 2);
+        double x = (double)150 + (t * 39 % 400);
+        double y = 50;
+        double randRadius = 4;
         Color color;
         try {color = listOfColors.get(t);}
         catch(Exception e){color = Color.WHITE;}
@@ -173,9 +201,9 @@ public class GamePanel extends JPanel {
         super.paintComponent(g);
 
         g.setColor(Color.BLACK);
-        g.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        g.fillRect(0, 0, SIMULATION_X, SIMULATION_Y);
 
-        circleConstraint.draw(g);
+//        circleConstraint.draw(g);
 
 
         for (Circle circle: listOfCircle) {
@@ -183,17 +211,30 @@ public class GamePanel extends JPanel {
         }
 
         check_ending_of_simulation();
-        draw_collision_grid(g);
+//        draw_collision_grid(g);
         render_time = (float) timer.stop_miliseconds();
-        g.setFont(new Font(Font.DIALOG,  Font.BOLD, 15));
-        g.setColor(Color.WHITE);
-        g.drawString("Physics time: " + physics_time + " ms", 10, 30);
-        g.drawString("Render time: " + render_time + " ms", 10, 50);
+//        g.setFont(new Font(Font.DIALOG,  Font.PLAIN, 15));
+//        g.setColor(Color.WHITE);
+//        g.drawString("Physics time: " + physics_time + " ms", -100, 30);
+//        g.drawString("Render time: " + render_time + " ms", 10, 50);
+//        g.drawString("Balls count: " + ballCount, 10, 70);
 
     }
 
+    public float getPhysics_time(){
+        return physics_time;
+    }
+
+    public int getBallCount() {
+        return ballCount;
+    }
+
+    public float getRender_time() {
+        return render_time;
+    }
+
     private void check_ending_of_simulation() {
-        if (System.nanoTime() - startGameTime > (double)(60) * 1000000000) {
+        if (System.nanoTime() - startGameTime > (double)(40) * 1000000000) {
             try {write_file();}
              catch (AWTException | IOException e) {throw new RuntimeException(e);}
         }
@@ -208,7 +249,7 @@ public class GamePanel extends JPanel {
 
     void apply_gravity(){
         for (Circle circle: listOfCircle) {
-            circle.accelerate(0, 2000);
+            circle.accelerate(0, 100);
         }
     }
 
@@ -227,7 +268,7 @@ public class GamePanel extends JPanel {
     public void solve_collision_naive() {
         double normalized_x;
         double normalized_y;
-        for (int i = 0; i < listOfCircle.size(); i++) {
+        for (int i = 0; i < ballCount; i++) {
             Circle object1 = listOfCircle.get(i);
             for (int j = 0; j < i; j++) {
                 Circle object2 = listOfCircle.get(j);
@@ -276,9 +317,9 @@ public class GamePanel extends JPanel {
                 collisionGrid[i][j].clear();
             }
         }
-        for (int i = 0; i < listOfCircle.size(); i++){
+        for (int i = 0; i < ballCount; i++){
             int newH = (int)(listOfCircle.get(i).getY_cur() / cellSize);
-            int newW = (int)(listOfCircle.get(i).getY_cur() / cellSize);
+            int newW = (int)(listOfCircle.get(i).getX_cur() / cellSize);
             collisionGrid[newH][newW].add(i);
         }
     }
@@ -330,6 +371,22 @@ public class GamePanel extends JPanel {
                         object2.setY_cur(object2.getY_cur() - 0.5 * delta * normalized_y);
                     }
                 }
+            }
+        }
+    }
+    public void check_constraint_rectangle(){
+        for (Circle circle : listOfCircle){
+            if (circle.getX_cur() < 100){
+                circle.setX_cur(100);
+            }
+            if (circle.getX_cur() > SIMULATION_X - 100){
+                circle.setX_cur(SIMULATION_X - 100);
+            }
+            if (circle.getY_cur() < 50){
+                circle.setY_cur(50);
+            }
+            if (circle.getY_cur() > SIMULATION_Y- 50){
+                circle.setY_cur(SIMULATION_Y - 50);
             }
         }
     }

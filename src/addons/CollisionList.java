@@ -10,7 +10,7 @@ public class CollisionList implements Iterable<Integer>{
 
 
     public CollisionList(){
-        maxIndex = 9;
+        maxIndex = 4;
         size = 0;
         list = new int[maxIndex];
     }
@@ -56,7 +56,9 @@ public class CollisionList implements Iterable<Integer>{
     }
 
 
-//    public static void main(String[] args){
+    public static void main(String[] args){
+        System.out.println((int)0.2);
+        System.out.println((int)0.8);
 //        CollisionList collisionList = new CollisionList();
 //        collisionList.add(1);
 //        collisionList.add(5);
@@ -69,5 +71,5 @@ public class CollisionList implements Iterable<Integer>{
 //             ) {
 //            System.out.println(element);
 //        }
-//    }
+    }
 }
