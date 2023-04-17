@@ -39,7 +39,7 @@ public class ImageController {
         }
     }
 
-    public void write_file(ArrayList<Circle> listOfCircle, int SIMULATION_X, int SIMULATION_Y) throws AWTException, IOException {
+    public void write_file(Circle[] listOfCircle, int SIMULATION_X, int SIMULATION_Y) throws AWTException, IOException {
         int newWidth = 1600;
         int newHeight = 900;
 
@@ -51,19 +51,24 @@ public class ImageController {
 
         try {
             FileWriter myWriter = new FileWriter(fileWithColors);
-            for (Circle circle: listOfCircle){
-                myWriter.write((circle.getX_cur()) + " " + (circle.getY_cur()) + " ");
+            for (Circle circle: listOfCircle) {
+                if (circle != null) {
+                    myWriter.write((circle.getX_cur()) + " " + (circle.getY_cur()) + " ");
 
-                Color color = new Color(
-                        newImage.getRGB(
-                                (int)(circle.getX_cur() + circle.getRadius() + diffX),
-                                (int)(circle.getY_cur() + circle.getRadius() + diffY)
-                        )
-                );
-                int red = color.getRed();
-                int green = color.getGreen();
-                int blue = color.getBlue();
-                myWriter.write(red + " " + green + " " + blue + " " + "\n");
+                    Color color = new Color(
+                            newImage.getRGB(
+                                    (int) (circle.getX_cur() + circle.getRadius() + diffX),
+                                    (int) (circle.getY_cur() + circle.getRadius() + diffY)
+                            )
+                    );
+                    int red = color.getRed();
+                    int green = color.getGreen();
+                    int blue = color.getBlue();
+                    myWriter.write(red + " " + green + " " + blue + " " + "\n");
+                }
+                else{
+                    break;
+                }
             }
 
             myWriter.close();

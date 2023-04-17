@@ -6,10 +6,6 @@ import java.awt.*;
 public class GameWindow {
     private JFrame jFrame;
 
-    private float physics_time;
-    private float render_time;
-
-    private int ballCount;
 
     public GameWindow(GamePanel gamePanel, InfoPanel infoPanel) {
         jFrame = new JFrame("Symulacja");

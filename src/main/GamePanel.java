@@ -17,20 +17,20 @@ public class GamePanel extends JPanel {
     private double lastTimeOfBallSpawn;
     private boolean canCreateBall;
     private final double ballTimeDelay;
-    private final short SUBSTEPS = 6;
+    private final short SUBSTEPS = 8;
     private final double startGameTime;
     private static int MAX_BALLS = 20000;
     private int ballCount = 0;
 
-    ArrayList<Circle> listOfCircle = new ArrayList<Circle>();
+    Circle[] listOfCircle = new Circle[MAX_BALLS + 30];
     ArrayList<Color> listOfColors = new ArrayList<Color>();
 
     private final int SIMULATION_X = 1000;
     private final int SIMULATION_Y = 900;
 
     private final int cellSize = 6;
-    private final int cellWidth = (SIMULATION_X / cellSize) + 1;
-    private final int cellHeight = (SIMULATION_Y / cellSize) + 1;
+    private final int cellWidth = (SIMULATION_X / cellSize);
+    private final int cellHeight = (SIMULATION_Y / cellSize);
     private FixedArrayList[][] collisionGrid;
 
 //    private CircleConstraints circleConstraint;
@@ -44,7 +44,7 @@ public class GamePanel extends JPanel {
 
     private Game game;
 
-    int threadCount = 4;
+    int threadCount = 8;
     int sliceCount = threadCount * 2;
     int sliceSize = (cellWidth/ sliceCount) * cellHeight;
     public GamePanel(Game game){
@@ -122,7 +122,7 @@ public class GamePanel extends JPanel {
         try {color = listOfColors.get(t);}
         catch(Exception e){color = Color.WHITE;}
 
-        listOfCircle.add(new Circle(x, y, randRadius, color));
+        listOfCircle[ballCount] = new Circle(x, y, randRadius, color);
     }
 
 
@@ -135,8 +135,8 @@ public class GamePanel extends JPanel {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, SIMULATION_X, SIMULATION_Y);
 
-        for (Circle circle: listOfCircle) {
-            circle.draw(g);
+        for (int i = 0; i < ballCount; i++) {
+            listOfCircle[i].draw(g);
         }
 
         check_ending_of_simulation();
@@ -172,17 +172,17 @@ public class GamePanel extends JPanel {
     }
 
     void apply_gravity(){
-        for (Circle circle: listOfCircle) {
-            circle.accelerate(0, 50);
+        for (int i = 0; i < ballCount; i++) {
+            listOfCircle[i].accelerate(0, 50);
         }
     }
 
     public void solve_collision_naive() {
         double normalized_x, normalized_y;
         for (int i = 0; i < ballCount; i++) {
-            Circle object1 = listOfCircle.get(i);
+            Circle object1 = listOfCircle[i];
             for (int j = 0; j < i; j++) {
-                Circle object2 = listOfCircle.get(j);
+                Circle object2 = listOfCircle[j];
                 double diff_x = object1.getX_cur() - object2.getX_cur();
                 double diff_y = object1.getY_cur() - object2.getY_cur();
                 double distance = Math.sqrt(diff_x * diff_x + diff_y * diff_y);
@@ -206,8 +206,9 @@ public class GamePanel extends JPanel {
     }
 
     public void update_positions(double dt) {
-        for (Circle circle : listOfCircle)
-            circle.update_position(dt);
+        for (int i = 0; i < ballCount; i++) {
+            listOfCircle[i].update_position(dt);
+        }
     }
 
     private void add_objects_to_grid(){
@@ -217,8 +218,8 @@ public class GamePanel extends JPanel {
             }
         }
         for (int i = 0; i < ballCount; i++){
-            int newH = (int)(listOfCircle.get(i).getY_cur() / cellSize);
-            int newW = (int)(listOfCircle.get(i).getX_cur() / cellSize);
+            int newH = (int)(listOfCircle[i].getY_cur() / cellSize);
+            int newW = (int)(listOfCircle[i].getX_cur() / cellSize);
             collisionGrid[newH][newW].add(i);
         }
     }
@@ -243,6 +244,7 @@ public class GamePanel extends JPanel {
         }
     }
 
+
     public void solve_collision_between_cells(FixedArrayList cell1, FixedArrayList cell2) {
 
         double normalized_x;
@@ -254,8 +256,8 @@ public class GamePanel extends JPanel {
         for (int index1 : cell1) {
             for (int index2 : cell2) {
                 if (index1 != index2){
-                    Circle object1 = listOfCircle.get(index1);
-                    Circle object2 = listOfCircle.get(index2);
+                    Circle object1 = listOfCircle[index1];
+                    Circle object2 = listOfCircle[index2];
 
                     diff_x = object1.getX_cur() - object2.getX_cur();
                     diff_y = object1.getY_cur() - object2.getY_cur();
@@ -338,18 +340,18 @@ public class GamePanel extends JPanel {
 
 
     public void check_constraint_rectangle(){
-        for (Circle circle : listOfCircle){
-            if (circle.getX_cur() < 100){
-                circle.setX_cur(100);
+        for (int i = 0; i < ballCount; i++) {
+            if (listOfCircle[i].getX_cur() < 100){
+                listOfCircle[i].setX_cur(100);
             }
-            if (circle.getX_cur() > SIMULATION_X - 120){
-                circle.setX_cur(SIMULATION_X - 120);
+            if (listOfCircle[i].getX_cur() > SIMULATION_X - 120){
+                listOfCircle[i].setX_cur(SIMULATION_X - 120);
             }
-            if (circle.getY_cur() < 50){
-                circle.setY_cur(50);
+            if (listOfCircle[i].getY_cur() < 50){
+                listOfCircle[i].setY_cur(50);
             }
-            if (circle.getY_cur() > SIMULATION_Y- 50){
-                circle.setY_cur(SIMULATION_Y - 50);
+            if (listOfCircle[i].getY_cur() > SIMULATION_Y- 50){
+                listOfCircle[i].setY_cur(SIMULATION_Y - 50);
             }
         }
     }
