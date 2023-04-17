@@ -1,13 +1,13 @@
 package addons;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
 public class CollisionList implements Iterable<Integer>{
     public int[] list;
     public int size;
-    private int maxIndex;
-
+    private final int maxIndex;
 
     public CollisionList(){
         maxIndex = 4;
@@ -55,21 +55,4 @@ public class CollisionList implements Iterable<Integer>{
         Iterable.super.forEach(action);
     }
 
-
-    public static void main(String[] args){
-        System.out.println((int)0.2);
-        System.out.println((int)0.8);
-//        CollisionList collisionList = new CollisionList();
-//        collisionList.add(1);
-//        collisionList.add(5);
-//
-////        for (int i = 0; i < collisionList.size; i++){
-////            System.out.println(collisionList[i]);
-////        }
-//
-//        for (int element: collisionList
-//             ) {
-//            System.out.println(element);
-//        }
-    }
 }
