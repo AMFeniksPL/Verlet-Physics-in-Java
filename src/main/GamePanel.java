@@ -4,23 +4,22 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import addons.CollisionList;
 import addons.ImageController;
 import addons.TimeCounter;
 import objectsToDraw.Circle;
-import objectsToDraw.CircleConstraints;
-
-import static main.Game.GAME_HEIGHT;
-import static main.Game.GAME_WIDTH;
 
 public class GamePanel extends JPanel {
     private double lastTimeOfBallSpawn;
     private boolean canCreateBall;
     private final double ballTimeDelay;
-    private final short SUBSTEPS = 10;
+    private final short SUBSTEPS = 8;
     private final double startGameTime;
-    private static int MAX_BALLS = 11350;
+    private static int MAX_BALLS = 11150;
     private int ballCount = 0;
 
     ArrayList<Circle> listOfCircle = new ArrayList<Circle>();
@@ -44,6 +43,10 @@ public class GamePanel extends JPanel {
     private ImageController imageController;
 
     private Game game;
+
+    int threadCount = Runtime.getRuntime().availableProcessors();
+    int sliceCount = threadCount * 2;
+    int sliceSize = (cellWidth/ sliceCount) * cellHeight;
     public GamePanel(Game game){
 
         this.game = game;
@@ -100,6 +103,7 @@ public class GamePanel extends JPanel {
         for (int i = 0; i < SUBSTEPS; i++){
             add_objects_to_grid();
             find_collision_grid();
+//            find_collision_grid_threaded();
             apply_gravity();
             update_positions(((double)1/60) / SUBSTEPS);
             check_constraint_rectangle();
@@ -124,6 +128,7 @@ public class GamePanel extends JPanel {
 
     public void paintComponent(Graphics g){
         update();
+
         timer.start();
         super.paintComponent(g);
 
@@ -233,7 +238,6 @@ public class GamePanel extends JPanel {
         for (int di = -1; di <= 1; di++) {
             for (int dj = -1; dj <= 1; dj++) {
                 CollisionList otherCell = collisionGrid[i + di][j + dj];
-
                 solve_collision_between_cells(cell, otherCell);
             }
         }
@@ -289,6 +293,50 @@ public class GamePanel extends JPanel {
 //            }
 //        }
 //    }
+
+    public void find_collision_grid_threaded() {
+
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+            final int sliceIndex = 2 * i;
+            executor.submit(() -> new MyThread(this, sliceIndex, sliceSize).start());
+        }
+
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        executor = Executors.newFixedThreadPool(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+            final int sliceIndex = 2 * i + 1;
+            executor.submit(() -> new MyThread(this, sliceIndex, sliceSize).start());
+        }
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void solve_collision_threaded(int sliceIndex, int sliceSize){
+
+        int start = sliceIndex * sliceSize;
+        int end = (sliceIndex + 1) * sliceSize;
+
+        for (int i = start; i < end; i++){
+            int newX = Math.min(Math.max(1, i % cellHeight), cellHeight - 2);
+            int newY = Math.min(Math.max(1, i / cellHeight), cellWidth - 2);
+            process_cell(newX, newY);
+        }
+    }
+
+
+
     public void check_constraint_rectangle(){
         for (Circle circle : listOfCircle){
             if (circle.getX_cur() < 100){
@@ -305,4 +353,7 @@ public class GamePanel extends JPanel {
             }
         }
     }
+
+
+
 }
