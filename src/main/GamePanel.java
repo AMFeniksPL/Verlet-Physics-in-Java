@@ -19,7 +19,7 @@ public class GamePanel extends JPanel {
     private final double ballTimeDelay;
     private final short SUBSTEPS = 8;
     private final double startGameTime;
-    private static int MAX_BALLS = 11150;
+    private static int MAX_BALLS = 20000;
     private int ballCount = 0;
 
     ArrayList<Circle> listOfCircle = new ArrayList<Circle>();
@@ -28,7 +28,7 @@ public class GamePanel extends JPanel {
     private final int SIMULATION_X = 1000;
     private final int SIMULATION_Y = 900;
 
-    private final int cellSize = 8;
+    private final int cellSize = 6;
     private final int cellWidth = (SIMULATION_X / cellSize) + 1;
     private final int cellHeight = (SIMULATION_Y / cellSize) + 1;
     private CollisionList [][] collisionGrid;
@@ -44,7 +44,7 @@ public class GamePanel extends JPanel {
 
     private Game game;
 
-    int threadCount = Runtime.getRuntime().availableProcessors();
+    int threadCount = 8;
     int sliceCount = threadCount * 2;
     int sliceSize = (cellWidth/ sliceCount) * cellHeight;
     public GamePanel(Game game){
@@ -57,7 +57,7 @@ public class GamePanel extends JPanel {
         ballTimeDelay = 0.02;
         startGameTime = System.nanoTime();
         try {
-            imageController = new ImageController("res/cyberpaka_FH.png", "color_positions.txt");
+            imageController = new ImageController("res/rick wallpaper.jpg", "color_positions.txt");
         }
         catch(Exception e){
             e.printStackTrace();
@@ -88,7 +88,7 @@ public class GamePanel extends JPanel {
     public void update(){
         timer.start();
         if (ballCount < MAX_BALLS){
-            for (int i = 0; i < 15; i++) {
+            for (int i = 0; i < 30; i++) {
                 create_ball(ballCount);
                 ballCount++;
             }
@@ -115,9 +115,9 @@ public class GamePanel extends JPanel {
     private void create_ball(int t) {
 //        double x = (double)GAME_WIDTH / 2 + circleConstraint.getRadius() * Math.cos( 0.3) * Math.pow(-1, t);
 //        double y = (double)GAME_HEIGHT/ 2 + circleConstraint.getRadius()  * Math.sin( 2);
-        double x = (double)150 + (t * 39 % 600);
+        double x = (double)150 + (t * 29 % 600);
         double y = 50;
-        double randRadius = 4;
+        double randRadius = 3;
         Color color;
         try {color = listOfColors.get(t);}
         catch(Exception e){color = Color.WHITE;}
@@ -342,8 +342,8 @@ public class GamePanel extends JPanel {
             if (circle.getX_cur() < 100){
                 circle.setX_cur(100);
             }
-            if (circle.getX_cur() > SIMULATION_X - 100){
-                circle.setX_cur(SIMULATION_X - 100);
+            if (circle.getX_cur() > SIMULATION_X - 120){
+                circle.setX_cur(SIMULATION_X - 120);
             }
             if (circle.getY_cur() < 50){
                 circle.setY_cur(50);
