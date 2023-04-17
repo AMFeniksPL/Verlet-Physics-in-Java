@@ -102,8 +102,8 @@ public class GamePanel extends JPanel {
 
         for (int i = 0; i < SUBSTEPS; i++){
             add_objects_to_grid();
-            find_collision_grid();
-//            find_collision_grid_threaded();
+//            find_collision_grid();
+            find_collision_grid_threaded();
             apply_gravity();
             update_positions(((double)1/60) / SUBSTEPS);
             check_constraint_rectangle();
@@ -299,7 +299,7 @@ public class GamePanel extends JPanel {
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         for (int i = 0; i < threadCount; i++) {
             final int sliceIndex = 2 * i;
-            executor.submit(() -> new MyThread(this, sliceIndex, sliceSize).start());
+            executor.submit(() -> solve_collision_threaded( sliceIndex, sliceSize));
         }
 
         executor.shutdown();
@@ -312,7 +312,7 @@ public class GamePanel extends JPanel {
         executor = Executors.newFixedThreadPool(threadCount);
         for (int i = 0; i < threadCount; i++) {
             final int sliceIndex = 2 * i + 1;
-            executor.submit(() -> new MyThread(this, sliceIndex, sliceSize).start());
+            executor.submit(() -> solve_collision_threaded(sliceIndex, sliceSize));
         }
         executor.shutdown();
         try {

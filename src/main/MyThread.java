@@ -13,6 +13,7 @@ public class MyThread extends Thread {
 
     @Override
     public void run() {
+        this.setPriority(Thread.MAX_PRIORITY);
         gamePanel.solve_collision_threaded(sliceIndex, sliceSize);
     }
 }
