@@ -44,8 +44,8 @@ public class Circle {
         x_old = x_cur;
         y_old = y_cur;
 
-        x_cur += velX + (accX - velX * 200) * dt * dt;
-        y_cur += velY + (accY - velY * 200) * dt * dt;
+        x_cur += velX + (accX - velX * 100) * dt * dt;
+        y_cur += velY + (accY - velY * 100) * dt * dt;
 
         accX = 0;
         accY = 0;

@@ -1,15 +1,14 @@
 package addons;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
-public class CollisionList implements Iterable<Integer>{
+public class FixedArrayList implements Iterable<Integer>{
     public int[] list;
-    public int size;
-    private final int maxIndex;
+    public short size;
+    private final short maxIndex;
 
-    public CollisionList(){
+    public FixedArrayList(){
         maxIndex = 4;
         size = 0;
         list = new int[maxIndex];

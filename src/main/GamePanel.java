@@ -8,7 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import addons.CollisionList;
+import addons.FixedArrayList;
 import addons.ImageController;
 import addons.TimeCounter;
 import objectsToDraw.Circle;
@@ -17,7 +17,7 @@ public class GamePanel extends JPanel {
     private double lastTimeOfBallSpawn;
     private boolean canCreateBall;
     private final double ballTimeDelay;
-    private final short SUBSTEPS = 8;
+    private final short SUBSTEPS = 6;
     private final double startGameTime;
     private static int MAX_BALLS = 20000;
     private int ballCount = 0;
@@ -31,7 +31,7 @@ public class GamePanel extends JPanel {
     private final int cellSize = 6;
     private final int cellWidth = (SIMULATION_X / cellSize) + 1;
     private final int cellHeight = (SIMULATION_Y / cellSize) + 1;
-    private CollisionList [][] collisionGrid;
+    private FixedArrayList[][] collisionGrid;
 
 //    private CircleConstraints circleConstraint;
 
@@ -44,7 +44,7 @@ public class GamePanel extends JPanel {
 
     private Game game;
 
-    int threadCount = 8;
+    int threadCount = 4;
     int sliceCount = threadCount * 2;
     int sliceSize = (cellWidth/ sliceCount) * cellHeight;
     public GamePanel(Game game){
@@ -57,7 +57,7 @@ public class GamePanel extends JPanel {
         ballTimeDelay = 0.02;
         startGameTime = System.nanoTime();
         try {
-            imageController = new ImageController("res/rick wallpaper.jpg", "color_positions.txt");
+            imageController = new ImageController("res/Phoenix Wallpaper.jpg", "color_positions.txt");
         }
         catch(Exception e){
             e.printStackTrace();
@@ -77,10 +77,10 @@ public class GamePanel extends JPanel {
     }
 
     private void start(){
-        collisionGrid = new CollisionList[cellHeight][cellWidth];
+        collisionGrid = new FixedArrayList[cellHeight][cellWidth];
         for (int i = 0; i < cellHeight; i++)
             for (int j = 0; j < cellWidth; j++)
-                collisionGrid[i][j] = new CollisionList();
+                collisionGrid[i][j] = new FixedArrayList();
         imageController.read_file(listOfColors);
     }
 
@@ -115,8 +115,8 @@ public class GamePanel extends JPanel {
     private void create_ball(int t) {
 //        double x = (double)GAME_WIDTH / 2 + circleConstraint.getRadius() * Math.cos( 0.3) * Math.pow(-1, t);
 //        double y = (double)GAME_HEIGHT/ 2 + circleConstraint.getRadius()  * Math.sin( 2);
-        double x = (double)150 + (t * 29 % 600);
-        double y = 50;
+        double x = (double)150 + (t * 29 % 150);
+        double y = 50 + (t % 5) * 5;
         double randRadius = 3;
         Color color;
         try {color = listOfColors.get(t);}
@@ -234,16 +234,16 @@ public class GamePanel extends JPanel {
 
     private void process_cell(int i, int j){
 
-        CollisionList cell = collisionGrid[i][j];
+        FixedArrayList cell = collisionGrid[i][j];
         for (int di = -1; di <= 1; di++) {
             for (int dj = -1; dj <= 1; dj++) {
-                CollisionList otherCell = collisionGrid[i + di][j + dj];
+                FixedArrayList otherCell = collisionGrid[i + di][j + dj];
                 solve_collision_between_cells(cell, otherCell);
             }
         }
     }
 
-    public void solve_collision_between_cells(CollisionList cell1, CollisionList cell2) {
+    public void solve_collision_between_cells(FixedArrayList cell1, FixedArrayList cell2) {
 
         double normalized_x;
         double normalized_y;
