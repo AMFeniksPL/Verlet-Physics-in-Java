@@ -64,6 +64,7 @@ public class Game {
 //            }
 
             if(deltaF >= 1){
+                gamePanel.update();
                 gamePanel.repaint();
                 infoPanel.repaint();
                 frames++;

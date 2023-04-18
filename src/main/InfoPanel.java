@@ -8,7 +8,7 @@ import java.awt.*;
 public class InfoPanel extends JPanel {
 
     private final Game game;
-    private float physics_time;
+    private float physics_time[];
     private float render_time;
     private int ballCount;
 
@@ -45,8 +45,11 @@ public class InfoPanel extends JPanel {
         g.fillRect(0, 0, getWidth(), getHeight());
         g.setColor(Color.WHITE);
         g.setFont(new Font(Font.DIALOG,  Font.PLAIN, 15));
-        g.drawString("Physics time: " + physics_time + " ms", 10, 30);
-        g.drawString("Render time: " + render_time + " ms", 10, 50);
-        g.drawString("Balls count: " + ballCount, 10, 70);
+        g.drawString("Add to grid time: " + physics_time[0] + " ms", 10, 30);
+        g.drawString("Collision time: " + physics_time[1] + " ms", 10, 50);
+        g.drawString("Apply Forces time: " + physics_time[2] + " ms", 10, 70);
+        g.drawString("Update positions: " + physics_time[3] + " ms", 10, 90);
+        g.drawString("Render time: " + render_time + " ms", 10, 110);
+        g.drawString("Balls count: " + ballCount, 10, 130);
     }
 }

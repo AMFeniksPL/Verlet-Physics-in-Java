@@ -19,16 +19,16 @@ public class GamePanel extends JPanel {
     private final double ballTimeDelay;
     private final short SUBSTEPS = 8;
     private final double startGameTime;
-    private static int MAX_BALLS = 20000;
+    private static int MAX_BALLS = 43000;
     private int ballCount = 0;
 
-    Circle[] listOfCircle = new Circle[MAX_BALLS + 30];
+    Circle[] listOfCircle = new Circle[MAX_BALLS + 300];
     ArrayList<Color> listOfColors = new ArrayList<Color>();
 
     private final int SIMULATION_X = 1000;
     private final int SIMULATION_Y = 900;
 
-    private final int cellSize = 6;
+    private final int cellSize = 4;
     private final int cellWidth = (SIMULATION_X / cellSize);
     private final int cellHeight = (SIMULATION_Y / cellSize);
     private FixedArrayList[][] collisionGrid;
@@ -37,14 +37,14 @@ public class GamePanel extends JPanel {
 
     private TimeCounter timer;
 
-    private float physics_time;
+    private float[] physics_time;
     private float render_time;
 
     private ImageController imageController;
 
     private Game game;
 
-    int threadCount = 8;
+    int threadCount = 20;
     int sliceCount = threadCount * 2;
     int sliceSize = (cellWidth/ sliceCount) * cellHeight;
     public GamePanel(Game game){
@@ -66,6 +66,7 @@ public class GamePanel extends JPanel {
         start();
 
         timer = new TimeCounter();
+        physics_time = new float[4];
 
     }
 
@@ -88,7 +89,7 @@ public class GamePanel extends JPanel {
     public void update(){
         timer.start();
         if (ballCount < MAX_BALLS){
-            for (int i = 0; i < 30; i++) {
+            for (int i = 0; i < 110; i++) {
                 create_ball(ballCount);
                 ballCount++;
             }
@@ -99,25 +100,38 @@ public class GamePanel extends JPanel {
         else if( System.nanoTime() - lastTimeOfBallSpawn > ballTimeDelay){
             canCreateBall = true;
         }
+        physics_time[0] = 0;
+        physics_time[1] = 0;
+        physics_time[2] = 0;
+        physics_time[3] = 0;
 
         for (int i = 0; i < SUBSTEPS; i++){
             add_objects_to_grid();
+            physics_time[0] += (float) timer.stop_miliseconds();
+            timer.start();
 //            find_collision_grid();
             find_collision_grid_threaded();
+            physics_time[1] += (float) timer.stop_miliseconds();
+            timer.start();
             apply_gravity();
+            physics_time[2] += (float) timer.stop_miliseconds();
+            timer.start();
             update_positions(((double)1/60) / SUBSTEPS);
+            physics_time[3] += (float) timer.stop_miliseconds();
+            timer.start();
             check_constraint_rectangle();
         }
-        physics_time = (float) timer.stop_miliseconds();
+        check_ending_of_simulation();
 
     }
 
     private void create_ball(int t) {
 //        double x = (double)GAME_WIDTH / 2 + circleConstraint.getRadius() * Math.cos( 0.3) * Math.pow(-1, t);
 //        double y = (double)GAME_HEIGHT/ 2 + circleConstraint.getRadius()  * Math.sin( 2);
-        double x = (double)150 + (t * 29 % 150);
-        double y = 50 + (t % 5) * 5;
-        double randRadius = 3;
+        double x = (double)150 + (t * 29 % 450);
+//        double y = 50 + (t % 5) * 5;
+        double y = 50 + 10 * (t % 7);
+        double randRadius = 2;
         Color color;
         try {color = listOfColors.get(t);}
         catch(Exception e){color = Color.WHITE;}
@@ -127,9 +141,9 @@ public class GamePanel extends JPanel {
 
 
     public void paintComponent(Graphics g){
-        update();
+//        update();
 
-        timer.start();
+//        timer.start();
         super.paintComponent(g);
 
         g.setColor(Color.BLACK);
@@ -141,11 +155,11 @@ public class GamePanel extends JPanel {
 
         check_ending_of_simulation();
 //        draw_collision_grid(g);
-        render_time = (float) timer.stop_miliseconds();
+//        render_time = (float) timer.stop_miliseconds();
 
     }
 
-    public float getPhysics_time(){
+    public float[] getPhysics_time(){
         return physics_time;
     }
 
@@ -329,7 +343,6 @@ public class GamePanel extends JPanel {
 
         int start = sliceIndex * sliceSize;
         int end = (sliceIndex + 1) * sliceSize;
-
         for (int i = start; i < end; i++){
             int newX = Math.min(Math.max(1, i % cellHeight), cellHeight - 2);
             int newY = Math.min(Math.max(1, i / cellHeight), cellWidth - 2);
