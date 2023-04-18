@@ -14,16 +14,14 @@ import addons.TimeCounter;
 import objectsToDraw.Circle;
 
 public class GamePanel extends JPanel {
-    private double lastTimeOfBallSpawn;
-    private boolean canCreateBall;
-    private final double ballTimeDelay;
+
     private final short SUBSTEPS = 8;
     private final double startGameTime;
-    private static int MAX_BALLS = 43000;
+    private static int MAX_BALLS = 44000;
     private int ballCount = 0;
 
     Circle[] listOfCircle = new Circle[MAX_BALLS + 300];
-    ArrayList<Color> listOfColors = new ArrayList<Color>();
+    ArrayList<Color> listOfColors = new ArrayList<>();
 
     private final int SIMULATION_X = 1000;
     private final int SIMULATION_Y = 900;
@@ -50,11 +48,7 @@ public class GamePanel extends JPanel {
     public GamePanel(Game game){
 
         this.game = game;
-//        circleConstraint = new CircleConstraints(GAME_WIDTH/2, GAME_HEIGHT/2, 425);
 
-        lastTimeOfBallSpawn = System.nanoTime();
-        canCreateBall = false;
-        ballTimeDelay = 0.02;
         startGameTime = System.nanoTime();
         try {
             imageController = new ImageController("res/Phoenix Wallpaper.jpg", "color_positions.txt");
@@ -67,7 +61,7 @@ public class GamePanel extends JPanel {
 
         timer = new TimeCounter();
         physics_time = new float[4];
-
+        setBackground(Color.black);
     }
 
     private void setPanelSize() {
@@ -94,31 +88,15 @@ public class GamePanel extends JPanel {
                 ballCount++;
             }
 
-            lastTimeOfBallSpawn = System.nanoTime();
-            canCreateBall = false;
+
         }
-        else if( System.nanoTime() - lastTimeOfBallSpawn > ballTimeDelay){
-            canCreateBall = true;
-        }
-        physics_time[0] = 0;
-        physics_time[1] = 0;
-        physics_time[2] = 0;
-        physics_time[3] = 0;
 
         for (int i = 0; i < SUBSTEPS; i++){
             add_objects_to_grid();
-            physics_time[0] += (float) timer.stop_miliseconds();
-            timer.start();
 //            find_collision_grid();
             find_collision_grid_threaded();
-            physics_time[1] += (float) timer.stop_miliseconds();
-            timer.start();
             apply_gravity();
-            physics_time[2] += (float) timer.stop_miliseconds();
-            timer.start();
             update_positions(((double)1/60) / SUBSTEPS);
-            physics_time[3] += (float) timer.stop_miliseconds();
-            timer.start();
             check_constraint_rectangle();
         }
         check_ending_of_simulation();
@@ -131,32 +109,20 @@ public class GamePanel extends JPanel {
         double x = (double)150 + (t * 29 % 450);
 //        double y = 50 + (t % 5) * 5;
         double y = 50 + 10 * (t % 7);
-        double randRadius = 2;
+
         Color color;
         try {color = listOfColors.get(t);}
         catch(Exception e){color = Color.WHITE;}
 
-        listOfCircle[ballCount] = new Circle(x, y, randRadius, color);
+        listOfCircle[ballCount] = new Circle(x, y, 2, color);
     }
 
 
     public void paintComponent(Graphics g){
-//        update();
-
-//        timer.start();
         super.paintComponent(g);
-
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, SIMULATION_X, SIMULATION_Y);
-
         for (int i = 0; i < ballCount; i++) {
             listOfCircle[i].draw(g);
         }
-
-        check_ending_of_simulation();
-//        draw_collision_grid(g);
-//        render_time = (float) timer.stop_miliseconds();
-
     }
 
     public float[] getPhysics_time(){

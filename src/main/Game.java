@@ -33,10 +33,6 @@ public class Game {
         run();
     }
 
-    public void update(){
-        gamePanel.update();
-    }
-
     public void run() {
         double timePerFrame = 1000000000.0 / FPS_SET;
         double timePerUpdate = 1000000000.0 / UPS_SET;
@@ -74,7 +70,7 @@ public class Game {
 
             if(System.currentTimeMillis() - lastCheck >= 1000 ){
                 lastCheck = System.currentTimeMillis();
-
+                System.out.println(frames);
 
                 frames = 0;
                 updates = 0;
